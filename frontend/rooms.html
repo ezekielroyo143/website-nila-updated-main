@@ -1,54 +1,272 @@
 <!doctype html>
+
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rooms - Mac Van Mae</title>
-    <link rel="stylesheet" href="./css/style.css" />
+    <title>Rooms & Villas - Mac Van Mae Resort</title>
+    <link rel="stylesheet" href="./css/rooms.css" />
   </head>
+
   <body>
     <header class="site-header">
       <div class="container nav">
-        <a class="brand" href="./index.html">Mac Van Mae <span>Resort</span></a
-        ><button class="nav-toggle" id="navToggle">☰</button>
+        <a class="brand" href="./index.html">
+          Mac Van Mae <span>Resort</span>
+        </a>
+
+        ```
+        <button class="nav-toggle" id="navToggle">☰</button>
+
         <nav id="siteNav">
-          <a href="./index.html">Home</a><a href="./rooms.html">Rooms</a
-          ><a href="./about.html">About</a
-          ><a href="./reservation.html">Reservation</a>
+          <a href="./index.html">Home</a>
+          <a href="./rooms.html" class="active">Rooms</a>
+          <a href="./about.html">About</a>
+          <a href="./reservation.html">Reservation</a>
         </nav>
+
         <div class="nav-actions">
-          <a href="./login.html" class="btn">Login</a
-          ><a href="./register.html" class="btn btn-primary">Register</a>
+          <a href="./login.html" class="btn">Login</a>
+          <a href="./register.html" class="btn btn-primary">Register</a>
         </div>
       </div>
     </header>
-    <section class="page-hero">
-      <div class="container">
-        <p class="eyebrow">ACCOMMODATIONS</p>
-        <h1>Our Rooms & Villas</h1>
-        <p>Find the space that fits your stay.</p>
+
+    <section class="rooms-hero">
+      <div class="rooms-hero-overlay"></div>
+
+      <div class="container rooms-hero-content">
+        <p class="eyebrow">STAY WITH US</p>
+
+        <h1>Find Your Perfect Stay</h1>
+
+        <p>
+          Discover comfortable rooms and private villas designed for relaxing
+          getaways at Mac Van Mae Resort.
+        </p>
       </div>
     </section>
-    <main class="container">
-      <div id="roomsGrid" class="rooms-grid"><p>Loading rooms...</p></div>
+
+    <main class="rooms-page">
+      <section class="container search-section">
+        <div class="room-search-card">
+          <div class="search-heading">
+            <div>
+              <p class="eyebrow">FIND YOUR ROOM</p>
+              <h2>What are you looking for?</h2>
+            </div>
+
+            <span class="room-count" id="roomCount"> Rooms available </span>
+          </div>
+
+          <div class="search-controls">
+            <div class="filter-group search-field">
+              <label for="roomSearch">Search</label>
+
+              <div class="input-wrapper">
+                <span>⌕</span>
+                <input
+                  type="text"
+                  id="roomSearch"
+                  placeholder="Search rooms or villas..."
+                />
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label for="roomTypeFilter">Room Type</label>
+
+              <select id="roomTypeFilter">
+                <option value="all">All Types</option>
+                <option value="room">Rooms</option>
+                <option value="villa">Villas</option>
+                <option value="family">Family</option>
+                <option value="suite">Suites</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="guestFilter">Guests</label>
+
+              <select id="guestFilter">
+                <option value="all">Any Capacity</option>
+                <option value="1">1+ Guest</option>
+                <option value="2">2+ Guests</option>
+                <option value="4">4+ Guests</option>
+                <option value="6">6+ Guests</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="sortRooms">Sort By</label>
+
+              <select id="sortRooms">
+                <option value="default">Recommended</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="name">Room Name</option>
+              </select>
+            </div>
+
+            <button class="filter-reset" id="resetFilters">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="container featured-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">RECOMMENDED FOR YOU</p>
+            <h2>Stay Somewhere Special</h2>
+          </div>
+
+          <p>
+            Comfortable spaces, peaceful surroundings, and everything you need
+            for a relaxing stay.
+          </p>
+        </div>
+
+        <div class="featured-card">
+          <div class="featured-image">
+            <img
+              src="./assets/images/anotherpoolview.jpg"
+              alt="Featured room at Mac Van Mae Resort"
+            />
+
+            <span class="featured-badge"> Featured Stay </span>
+          </div>
+
+          <div class="featured-content">
+            <p class="eyebrow">MAC VAN MAE EXPERIENCE</p>
+
+            <h3>Your Private Escape</h3>
+
+            <p>
+              Enjoy a peaceful retreat with comfortable interiors, relaxing
+              surroundings, and convenient access to the resort's facilities.
+            </p>
+
+            <div class="featured-features">
+              <span>✓ Comfortable Bed</span>
+              <span>✓ Private Space</span>
+              <span>✓ Resort Amenities</span>
+              <span>✓ Relaxing Environment</span>
+            </div>
+
+            <a href="#rooms" class="btn btn-primary"> Explore Rooms </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="container rooms-list-section" id="rooms">
+        <div class="section-heading rooms-heading">
+          <div>
+            <p class="eyebrow">ACCOMMODATIONS</p>
+            <h2>Our Rooms & Villas</h2>
+          </div>
+
+          <p>Choose the accommodation that fits your trip.</p>
+        </div>
+
+        <div class="active-filters" id="activeFilters">
+          <span class="filter-label">Showing:</span>
+          <span class="filter-tag">All Rooms</span>
+        </div>
+
+        <div id="roomsGrid" class="rooms-grid">
+          <div class="rooms-loading">
+            <div class="loading-spinner"></div>
+            <p>Loading rooms...</p>
+          </div>
+        </div>
+
+        <div id="noRooms" class="no-rooms">
+          <div class="no-rooms-icon">⌂</div>
+
+          <h3>No rooms found</h3>
+
+          <p>Try changing your filters or search for another room.</p>
+
+          <button class="btn btn-primary" id="clearRoomFilters">
+            Show All Rooms
+          </button>
+        </div>
+      </section>
+
+      <section class="container booking-info">
+        <div class="booking-info-card">
+          <div class="booking-icon">◆</div>
+
+          <div>
+            <p class="eyebrow">PLAN YOUR STAY</p>
+
+            <h2>Ready for a relaxing getaway?</h2>
+
+            <p>
+              Select your preferred room and continue to our reservation page to
+              plan your stay at Mac Van Mae Resort.
+            </p>
+          </div>
+
+          <a href="./reservation.html" class="btn btn-primary">
+            Make a Reservation
+          </a>
+        </div>
+      </section>
     </main>
+
     <div id="roomModal" class="modal">
       <div class="modal-box">
-        <button id="modalClose" class="modal-close">×</button
-        ><img id="modalImage" src="" alt="" />
+        <button id="modalClose" class="modal-close">×</button>
+
+        <div class="modal-image-wrapper">
+          <img id="modalImage" src="" alt="" />
+
+          <span class="modal-room-badge"> ROOM DETAILS </span>
+        </div>
+
         <div class="modal-content">
-          <p class="eyebrow">ROOM DETAILS</p>
+          <p class="eyebrow">YOUR NEXT STAY</p>
+
           <h2 id="modalTitle"></h2>
+
           <p id="modalDescription"></p>
+
           <div id="modalAmenities" class="amenities"></div>
+
+          <div class="modal-info-grid">
+            <div class="modal-info-item">
+              <span>Capacity</span>
+              <strong id="modalCapacity">—</strong>
+            </div>
+
+            <div class="modal-info-item">
+              <span>Availability</span>
+              <strong class="available"> Available </strong>
+            </div>
+          </div>
+
           <p id="modalInfo"></p>
-          <div class="price" id="modalPrice"></div>
-          <a id="modalReserve" class="btn btn-primary" href="./reservation.html"
-            >Reserve This Room</a
-          >
+
+          <div class="modal-bottom">
+            <div>
+              <span class="price-label">Starting from</span>
+              <div class="price" id="modalPrice"></div>
+              <span class="price-note">per night</span>
+            </div>
+
+            <a
+              id="modalReserve"
+              class="btn btn-primary"
+              href="./reservation.html"
+            >
+              Reserve This Room
+            </a>
+          </div>
         </div>
       </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./js/supabase.js"></script>
     <script src="./js/main.js"></script>

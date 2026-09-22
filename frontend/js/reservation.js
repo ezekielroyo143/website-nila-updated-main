@@ -37,6 +37,16 @@ function getNights() {
     return 0;
   }
 
+  function getTotalAmount() {
+    const nights = getNights();
+    if (!selectedRoom || nights < 1) return 0;
+    return Number(selectedRoom.price) * nights;
+  }
+
+  function getDepositAmount(total = getTotalAmount()) {
+    return total * 0.2;
+  }
+
   const start = new Date(checkIn.value + "T00:00:00");
   const end = new Date(checkOut.value + "T00:00:00");
 
@@ -51,6 +61,7 @@ function updateSummary() {
 
   const nights = getNights();
   const total = selectedRoom ? Number(selectedRoom.price) * nights : 0;
+  const deposit = total * 0.2;
 
   const summaryRoom = document.getElementById("summaryRoom");
   const summaryCheckIn = document.getElementById("summaryCheckIn");
@@ -58,33 +69,22 @@ function updateSummary() {
   const summaryNights = document.getElementById("summaryNights");
   const summaryRate = document.getElementById("summaryRate");
   const summaryTotal = document.getElementById("summaryTotal");
+  const summaryDeposit = document.getElementById("summaryDeposit"); // optional in HTML
 
-  if (summaryRoom) {
+  if (summaryRoom)
     summaryRoom.textContent = selectedRoom ? selectedRoom.name : "-";
-  }
-
-  if (summaryCheckIn) {
-    summaryCheckIn.textContent = checkIn.value ? checkIn.value : "-";
-  }
-
-  if (summaryCheckOut) {
-    summaryCheckOut.textContent = checkOut.value ? checkOut.value : "-";
-  }
-
-  if (summaryNights) {
-    summaryNights.textContent = nights;
-  }
-
+  if (summaryCheckIn) summaryCheckIn.textContent = checkIn.value || "-";
+  if (summaryCheckOut) summaryCheckOut.textContent = checkOut.value || "-";
+  if (summaryNights) summaryNights.textContent = nights;
   if (summaryRate) {
     summaryRate.textContent = selectedRoom ? peso(selectedRoom.price) : "₱0.00";
   }
+  if (summaryTotal) summaryTotal.textContent = peso(total);
+  if (summaryDeposit) summaryDeposit.textContent = peso(deposit);
 
-  if (summaryTotal) {
-    summaryTotal.textContent = peso(total);
-  }
-
+  // Payment modal should show 20% only
   if (paymentAmount) {
-    paymentAmount.textContent = peso(total);
+    paymentAmount.textContent = peso(deposit);
   }
 }
 
@@ -296,19 +296,30 @@ function closePaymentModalWindow() {
 form.addEventListener("submit", (event) => {
   event.preventDefault();
 
-  if (!validateReservation()) {
-    return;
-  }
+  if (!validateReservation()) return;
 
-  const nights = getNights();
-  const total = Number(selectedRoom.price) * nights;
+  const total = getTotalAmount();
+  const deposit = getDepositAmount(total);
 
   if (paymentAmount) {
-    paymentAmount.textContent = peso(total);
+    paymentAmount.textContent = peso(deposit); // 20% only
   }
 
   openPaymentModal();
 });
+
+if (!validateReservation()) {
+  return;
+}
+
+const nights = getNights();
+const total = Number(selectedRoom.price) * nights;
+
+if (paymentAmount) {
+  paymentAmount.textContent = peso(total);
+}
+
+openPaymentModal();
 
 if (closePaymentModal) {
   closePaymentModal.addEventListener("click", closePaymentModalWindow);
@@ -323,50 +334,10 @@ if (paymentModal) {
 }
 
 async function submitReservation() {
-  if (paymentMessage) {
-    paymentMessage.className = "";
-    paymentMessage.textContent = "";
-  }
-
-  const reference = paymentReference.value.trim();
-
-  if (!reference) {
-    paymentMessage.className = "message-error";
-    paymentMessage.textContent = "Please enter your GCash reference number.";
-
-    return;
-  }
-
-  const {
-    data: { session },
-    error: authError,
-  } = await window.supabaseClient.auth.getSession();
-
-  if (authError) {
-    console.error("Authentication error:", authError);
-
-    paymentMessage.className = "message-error";
-    paymentMessage.textContent = "Unable to verify your login.";
-
-    return;
-  }
-
-  if (!session || !session.user) {
-    paymentMessage.className = "message-error";
-    paymentMessage.textContent = "Please log in before making a reservation.";
-
-    return;
-  }
-
-  if (!validateReservation()) {
-    return;
-  }
-
   const nights = getNights();
   const total = Number(selectedRoom.price) * nights;
-
-  submitReservationBtn.disabled = true;
-  submitReservationBtn.textContent = "Submitting...";
+  const deposit = total * 0.2;
+  const reference = paymentReference.value.trim();
 
   const { error } = await window.supabaseClient.from("reservations").insert({
     user_id: session.user.id,
@@ -380,30 +351,14 @@ async function submitReservation() {
     adults: Number(adults.value),
     children: Number(children.value || 0),
     special_requests: document.getElementById("specialRequests").value.trim(),
-    total: total,
+
+    total: total, // full amount
+    deposit_amount: deposit, // 20%
+    amount_paid: deposit, // what they paid online
+    payment_reference: reference,
+    payment_status: "deposit_paid", // or "partial"
+    status: "pending",
   });
-
-  if (error) {
-    console.error("Reservation error:", error);
-
-    paymentMessage.className = "message-error";
-    paymentMessage.textContent =
-      error.message || "Failed to submit reservation.";
-
-    submitReservationBtn.disabled = false;
-    submitReservationBtn.textContent = "Submit Reservation";
-
-    return;
-  }
-
-  paymentMessage.className = "message-success";
-  paymentMessage.textContent = "Reservation submitted successfully!";
-
-  submitReservationBtn.disabled = true;
-
-  setTimeout(() => {
-    window.location.href = "./my-reservations.html";
-  }, 1500);
 }
 
 roomSelect.addEventListener("change", updateSummary);

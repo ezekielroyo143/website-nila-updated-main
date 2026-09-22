@@ -1,49 +1,95 @@
 const navToggle = document.getElementById("navToggle");
-const nav = document.getElementById(".nav");
+const navMenu = document.getElementById("siteNav"); // or use class if needed
 
-if (navToggle && nav) {
+if (navToggle && navMenu) {
   navToggle.addEventListener("click", () => {
-    nav.classList.toggle("mobile-open");
+    navMenu.classList.toggle("mobile-open");
   });
 }
 
 async function updateNavigation() {
-  const navActions = document.getElementById("navActions");
+  const nav =
+    document.getElementById("navActions") ||
+    document.querySelector(".nav-actions");
 
-  if (!navActions) {
+  if (!nav) return;
+
+  // Make sure supabase is ready
+  if (!window.supabaseClient) {
+    console.error("supabaseClient not found");
     return;
   }
 
-  const { data, error } = await window.supabaseClient.auth.getUser();
+  const {
+    data: { session },
+    error: sessionError,
+  } = await window.supabaseClient.auth.getSession();
 
-  if (error) {
-    console.error("Navigation auth error:", error);
+  if (sessionError) {
+    console.error("Navigation auth error:", sessionError);
     return;
   }
 
-  if (data.user) {
-    navActions.innerHTML = `
-            <a href="./rooms.html" class="btn">Rooms</a>
-            <a href="./my-reservations.html" class="btn btn-primary">
-                My Reservations
-            </a>
-            <button type="button" class="btn" id="navLogoutBtn">
-                Logout
-            </button>
-        `;
+  // Not logged in
+  if (!session || !session.user) {
+    nav.innerHTML = `
+      <a href="./login.html" class="btn">Login</a>
+      <a href="./register.html" class="btn btn-primary">Register</a>
+    `;
+    return;
+  }
 
-    const logoutButton = document.getElementById("navLogoutBtn");
+  const userId = session.user.id;
 
-    logoutButton.addEventListener("click", async () => {
-      logoutButton.disabled = true;
-      logoutButton.textContent = "Logging out...";
+  // Check admin_users table (user is admin if their id exists there)
+  const { data: adminRow, error: adminError } = await window.supabaseClient
+    .from("admin_users")
+    .select("id")
+    .eq("id", userId) // change to .eq("user_id", userId) if your column is user_id
+    .maybeSingle();
+
+  if (adminError) {
+    console.warn("Admin check error:", adminError);
+  }
+
+  // Optional fallback: also check profiles.role
+  let isAdmin = !!adminRow;
+
+  if (!isAdmin) {
+    const { data: profile } = await window.supabaseClient
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle();
+
+    isAdmin = profile?.role === "admin";
+  }
+
+  if (isAdmin) {
+    nav.innerHTML = `
+      <a href="./admin.html" class="btn btn-primary">Admin Dashboard</a>
+      <button type="button" class="btn" id="navLogoutBtn">Logout</button>
+    `;
+  } else {
+    nav.innerHTML = `
+      <a href="./rooms.html" class="btn">Rooms</a>
+      <a href="./my-reservations.html" class="btn btn-primary">My Reservations</a>
+      <button type="button" class="btn" id="navLogoutBtn">Logout</button>
+    `;
+  }
+
+  const logoutBtn = document.getElementById("navLogoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async () => {
+      logoutBtn.disabled = true;
+      logoutBtn.textContent = "Logging out...";
 
       const { error } = await window.supabaseClient.auth.signOut();
 
       if (error) {
         console.error("Logout error:", error);
-        logoutButton.disabled = false;
-        logoutButton.textContent = "Logout";
+        logoutBtn.disabled = false;
+        logoutBtn.textContent = "Logout";
         return;
       }
 
