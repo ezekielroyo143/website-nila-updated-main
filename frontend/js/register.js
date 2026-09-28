@@ -1,3 +1,4 @@
+import { supabaseClient } from "./supabase.js";
 const registerForm = document.getElementById("registerForm");
 const registerMessage = document.getElementById("message");
 
